@@ -1,9 +1,15 @@
 require('dotenv').config()
 const express =require('express');
 const { createtodo, updatetodo } = require('./types');
-const {todo}= require("./db");
+const todo= require("./db");
+const cors=require("cors");
+const { default: mongoose } = require('mongoose');
 const app=express();
+const port =3000;
 app.use(express.json());
+app.use(cors({
+    origin:"http://localhost:5173"
+}));
 
 app.post("/todo", async function(req,res){
     const createPayload= req.body;
@@ -17,7 +23,7 @@ app.post("/todo", async function(req,res){
     await todo.create({
         title:createPayload.title,
         description:createPayload.description,
-        completes:false
+        completed:false,
     })
     res.json({
         msg:"Todo Created"
@@ -32,7 +38,7 @@ app.get("/todos",async function(req,res){
 })
 
 app.put("/completed",async function(req,res){
-const updatepayload=req.body();
+const updatepayload=req.body;
 const parsepayload= updatetodo.safeParse(updatepayload);
 if(!parsepayload.success){
     res.status(411).json({
@@ -41,7 +47,7 @@ if(!parsepayload.success){
     return;
 
 }
-await todo.update({
+await todo.updateOne({
     _id: req.body.id
 },{
     completed:true
